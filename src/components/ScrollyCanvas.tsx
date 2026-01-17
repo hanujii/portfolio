@@ -5,7 +5,7 @@ import { useScroll, useMotionValueEvent } from "framer-motion";
 
 const FRAME_COUNT = 192; // 0 to 191
 
-export default function ScrollyCanvas() {
+export default function ScrollyCanvas({ onLoaded }: { onLoaded?: () => void }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -26,12 +26,13 @@ export default function ScrollyCanvas() {
                 loadedCount++;
                 if (loadedCount === FRAME_COUNT) {
                     setIsLoaded(true);
+                    if (onLoaded) onLoaded();
                 }
             };
             imgArray.push(img);
         }
         setImages(imgArray);
-    }, []);
+    }, [onLoaded]);
 
     // Render logic
     const renderFrame = useCallback((index: number) => {
@@ -69,7 +70,6 @@ export default function ScrollyCanvas() {
     useEffect(() => {
         const handleResize = () => {
             if (canvasRef.current) {
-                // Force update/check
                 renderFrame(currentFrameRef.current);
             }
         };
@@ -93,14 +93,6 @@ export default function ScrollyCanvas() {
     return (
         <div className="h-[500vh] w-full relative">
             <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
-                {!isLoaded && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#121212] z-50 text-white">
-                        <div className="text-center">
-                            <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mb-4 mx-auto"></div>
-                            <p className="text-sm uppercase tracking-widest">Loading Experience</p>
-                        </div>
-                    </div>
-                )}
                 <canvas ref={canvasRef} className="block w-full h-full object-cover" />
             </div>
         </div>
